@@ -1,5 +1,7 @@
 const express= require("express");
 const users= require("./MOCK_DATA.json");
+const fs=require("fs");
+const { error } = require("console");
 
 const app=express();
 const port=8000
@@ -21,9 +23,16 @@ app.get("/users",(req,res)=>{
 
 
 
-app.post("api/users/",(req,res)=>{
+app.post("/api/users",(req,res)=>{
     //create a new user
-    return res.json({status:"pending"})
+    const body=req.query;
+    users.push({id: users.length+1,...body,})
+    fs.writeFile("./MOCK_DATA.json",JSON.stringify(users),(error,data)=>{
+        console.log("Body",body)
+        return res.json({status:"Success",id:users.length})
+    })
+
+   
 })
 
 
@@ -32,13 +41,10 @@ app.route("/api/users/:id")
 .get((req,res)=>{
 
     const id=Number(req.params.id)
-    if(id<=1000){
+   
     const user=users.find((user)=>user.id===id);
     res.json(user)
-    }else{
-        const html=`<h1>Hello hello mother fucker</h1>`
-        res.send(html);
-    }
+   
    
 })
 

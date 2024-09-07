@@ -12,3 +12,7 @@ POST /api/users  - create a new user
 PATCH /api/users/1  -Edit the user with id 1
 
 DELETE /api/users/1 -DELETE the user with id 1
+
+# Notes
+
+

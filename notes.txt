@@ -1,0 +1,12 @@
+# MiddleWares
+
+--> The middleWare are the interMidiatary functions that can perform any action on an upcomming request.
+--> A code can have multiple middleWares
+--> Middle wares can help verify a request then it can decide weather this request can be proceed
+    to the server or not
+
+@According to the documentation
+
+->Middleware functions are functions that have access to the request object (req), 
+the response object (res), and the next middleware function in the application’s 
+request-response cycle.
