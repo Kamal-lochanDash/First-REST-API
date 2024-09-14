@@ -16,3 +16,11 @@ Middleware can:-
 2. make changes to the request and the response object
 3. End the request response cycle
 4. call the middleware function in the stack
+
+
+@Http Headers
+
+--> Http Headers are an important part of the Api request and response as they
+    represent the meta data associated with the api request and response
+
+--> Headers carry information about the request response body.
