@@ -1,10 +1,56 @@
 const express= require("express");
-const users= require("./MOCK_DATA.json");
+
+const mongoose= require("mongoose");
 const fs=require("fs");
 const { error } = require("console");
+const { type } = require("os");
 
 const app=express();
 const port=8000
+
+
+//connection
+mongoose.connect('mongodb://127.0.0.1:27017/youtube-app-1')
+.then(()=>console.log("MongoDb connected"))
+.catch((err)=>console.log("mongo error",err));
+
+//Schema
+const userSchema= new mongoose.Schema({
+    firstName:{
+        type:String,
+       required:true
+    },
+
+    lastName:{
+        type:String,
+       //required:false //--> if we do not add default is false.
+    },
+
+    email:{
+        type:String,
+        required:true,
+        unique:true
+    },
+
+    jobTitle:{
+        type:String,
+
+    },
+    gender:{
+        type:String,
+    },
+
+
+},{timestamps:true});
+
+const User=mongoose.model('user',userSchema);
+
+
+
+
+
+
+
 app.use(express.urlencoded({extended: false}))//we can use this middle ware to parse the incomming request and pushes to the .body
 app.use((req,res,next)=>{
     //this is a middleware
@@ -27,18 +73,20 @@ app.use((req,res,next)=>{
 
 
 //# routs
-app.get("/api/users",(req,res)=>{
+app.get("/api/users",async (req,res)=>{
+    const allDbUsers=await User.find({})
     res.setHeader('x-myName','kamal lochan dash')
-    console.log(req.headers);
-   return res.json(users);
+   
+   return res.json(allDbUsers);
 })
 
-app.get("/users",(req,res)=>{
+app.get("/users",async (req,res)=>{
 
+    const allDbUsers= await User.find({});
 
     const html=`
    <ul>
-   ${users.map((users)=>`<li>${users.first_name}</li>`).join(" ")}
+   ${allDbUsers.map((users)=>`<li>${users.firstName} - ${users.email}</li>`).join(" ")}
    </ul>
     `;
 
@@ -47,7 +95,7 @@ app.get("/users",(req,res)=>{
 
 
 
-app.post("/api/users",(req,res)=>{
+app.post("/api/users",async (req,res)=>{
     //create a new user
    // const body=req.query;
 
@@ -56,22 +104,27 @@ app.post("/api/users",(req,res)=>{
    if(!body || !body.first_name || !body.last_name || !body.email || !body.gender || !body.job_title){
     return res.status(400).json({msg:"all filelds are required"});
    }
-    users.push({id: users.length+1,...body,})
-    fs.writeFile("./MOCK_DATA.json",JSON.stringify(users),(error,data)=>{
-        console.log("Body",body)
-        return res.status(201).json({status:"Success",id:users.length})
-    })
 
+   const result=await User.create({
+    firstName:body.first_name,
+    lastName:body.lastName,
+    email:body.email,
+    gender:body.gender,
+    jobTitle:body.job_title
+   })
+ console.log("Result",result);
+res.status(201).json({msg:"Success"})
    
 })
 
 
 app.route("/api/users/:id")
 
-.get((req,res)=>{
-    console.log("i am in the get route and my name is "+req.myUsername)
-    const id=Number(req.params.id)
-   const user=users.find((user)=>user.id===id);
+.get(async(req,res)=>{
+    const id=req.params.id
+   const user=await User.findById(id);
+    //const id=Number(req.params.id)
+   //const user=users.find((user)=>user.id===id);
 
    if(!user){
     return res.status(404).json({msg: "User not found"})
@@ -81,13 +134,15 @@ app.route("/api/users/:id")
    
 })
 
-.patch((req,res)=>{
+.patch(async(req,res)=>{
     //edit the user with id
-    return res.json({status:"pending"})
+    await User.findByIdAndUpdate(req.params.id,{lastName:"hogback"})
+    return res.status(202).json({status:"success"})
 })
 
-.post((req,res)=>{
+.delete(async(req,res)=>{
     //delete the user with id
-    return res.json({status:"pending"})
+    await User.findByIdAndDelete(req.params.id)
+    return res.status(202).json({status:"Deleted"})
 })
 app.listen(port,()=>console.log("app started at port 8000"))
